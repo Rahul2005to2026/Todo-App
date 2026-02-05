@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calm To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-check-circle"></i> Calm Tasks</h1>
+            <p class="subtitle">A peaceful place to organize your day</p>
+        </header>
+
+        <main class="app-main">
+            <!-- Add Task Form -->
+            <div class="add-task-card">
+                <form action="/add" method="POST" class="add-task-form">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="title" 
+                            placeholder="What needs to be done?" 
+                            class="task-input"
+                            required
+                            autofocus
+                        >
+                        <button type="submit" class="add-btn">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Task Statistics -->
+            <div class="stats-card">
+                <div class="stats-content">
+                    <span class="stat">
+                        <i class="fas fa-list-ol"></i>
+                        Total: {{ tasks|length }}
+                    </span>
+                    <span class="stat">
+                        <i class="fas fa-check"></i>
+                        Completed: {{ tasks|selectattr('completed')|list|length }}
+                    </span>
+                    <span class="stat">
+                        <i class="fas fa-clock"></i>
+                        Pending: {{ tasks|rejectattr('completed')|list|length }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            <div class="task-list-container">
+                {% if tasks %}
+                    <div class="task-list">
+                        {% for task in tasks %}
+                        <div class="task-item {% if task.completed %}completed{% endif %}">
+                            <div class="task-content">
+                                <div class="task-checkbox">
+                                    <a href="/toggle/{{ task.id }}" class="checkbox">
+                                        {% if task.completed %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% else %}
+                                            <i class="far fa-circle"></i>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                <div class="task-details">
+                                    <span class="task-title">{{ task.title }}</span>
+                                    <span class="task-meta">Added {{ task.created_at }}</span>
+                                </div>
+                                <div class="task-actions">
+                                    <a href="/delete/{{ task.id }}" class="delete-btn" 
+                                       onclick="return confirm('Delete this task?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Clear Completed Button -->
+                    {% if tasks|selectattr('completed')|list|length > 0 %}
+                    <div class="action-footer">
+                        <form action="/clear-completed" method="POST" class="clear-form">
+                            <button type="submit" class="clear-btn">
+                                <i class="fas fa-broom"></i> Clear Completed
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task using the form above</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Tips -->
+            <div class="tips-card">
+                <h3><i class="fas fa-lightbulb"></i> Tips</h3>
+                <ul class="tips-list">
+                    <li>Click the circle to mark tasks as complete</li>
+                    <li>Delete tasks you no longer need</li>
+                    <li>Keep your list focused and manageable</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Made with <i class="fas fa-heart"></i> for productive calmness</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add smooth interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to task items
+            const taskItems = document.querySelectorAll('.task-item');
+            taskItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Focus the input field on load
+            const taskInput = document.querySelector('.task-input');
+            if (taskInput) {
+                taskInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
